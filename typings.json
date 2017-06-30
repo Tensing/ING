@@ -1,0 +1,8 @@
+{
+  "globalDependencies": {
+    "flot": "registry:dt/flot#0.0.0+20170311011630",
+    "jquery": "registry:dt/jquery#1.10.0+20170310222111",
+    "mapbox": "registry:dt/mapbox#1.6.3+20160919070725",
+    "mapbox-gl": "registry:dt/mapbox-gl#0.30.0+20170316144853"
+  }
+}

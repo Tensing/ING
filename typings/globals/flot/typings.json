@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/632974f2c6e62bcdd84771910e7d61b159a56139/flot/index.d.ts",
+    "raw": "registry:dt/flot#0.0.0+20170311011630",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/632974f2c6e62bcdd84771910e7d61b159a56139/flot/index.d.ts"
+  }
+}
