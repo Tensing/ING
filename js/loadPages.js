@@ -24,7 +24,7 @@ $("#mapPage").click(function(){
 function submitForm() {
   console.log(document.forms["formING"]["customer"].value);
   window.address = document.forms["formING"]["address"].value;
-  window.zipcode = document.forms["formING"]["postcode"].value;
+  window.zipcode = document.forms["formING"]["postcode"].value.replace(/\s/g, '');;
   window.municipality = document.forms["formING"]["gemeente"].value;
   var fullAddress = address + ',+' + zipcode + ',+' + municipality;
   console.log(fullAddress);
@@ -57,22 +57,27 @@ function loadMap(lat, lng) {
 
 function geocodeAddress(Address){
   var geocodeURL = 'http://nominatim.openstreetmap.org/search?q='+Address+'&polygon=1&addressdetails=1&format=json&limit=1';
-  console.log(geocodeURL);
   $.ajax({
     url: geocodeURL,
     success: function(result){
-  		console.log(result["0"]);
-      window.lat = result["0"].lat;
-      window.lng = result["0"].lon;
+      if (result["0"] == undefined) {
+        alert("Geen locatie gevonden");
+        var lat = 52.314182;
+        var lng = 4.951721;
+        Address = "ING Bank, Bijlmerplein 888, 1102 MG Amsterdam-Zuidoost"
+      } else {
+    		console.log(result["0"]);
+        var lat = result["0"].lat;
+        var lng = result["0"].lon;
+      }
       loadMap(lng,lat);
-      window.map.on('load', function () {
+      map.on('load', function () {
         console.log(window.lat+" "+window.lng);
         loadData();
         addMarker(window.lat,window.lng, window.address);
-
       });
     }
-  })
+  });
 }
 
 function addMarker(lat,long, name) {
