@@ -1,5 +1,5 @@
 // HTML template strings
-formPage = '<!-- Page Heading --> <div class="row"> <div class="col-lg-12"> <!-- <h1 class="page-header"> Form </h1> --> <ol class="breadcrumb"> <li> <i class="fa fa-dashboard"></i> <a href="index.html">Dashboard</a> </li> <li class="active"> <i class="fa fa-edit"></i> Form </li> </ol> </div> </div> <!-- /.row --> <div class="row"> <div class="col-lg-12"> <form role="form" id="formING" name="formING" onsubmit="submitForm()"> <div class="form-group"> <label>Customer</label> <input id="customer" class="form-control"> </div> <div class="form-group"> <label>KVK nummer</label> <input id="kvk" class="form-control"> </div> <div class="form-group"> <label>Adres</label> <input id="address" class="form-control"> </div> <div class="form-group"> <label>Postcode</label> <input id="postcode" class="form-control"> </div> <div class="form-group"> <label>Gemeente</label> <input id="gemeente" class="form-control"> </div> <div class="form-group"> <label>Aangevraagde lening</label> <input id="loan" class="form-control"> </div> <div class="form-group"> <label>Type lening</label> <select id="type" class="form-control"> <option value="restaurant">Restaurant</option> <option value="kantoor">Kantoor</option> </select> </div> <button type="submit" class="btn btn-default">Submit Button</button> <button type="reset" class="btn btn-default">Reset Button</button> </form> </div> </div> <!-- /.row -->'
+formPage = '<!-- Page Heading --> <div class="row"> <div class="col-lg-12"> <!-- <h1 class="page-header"> Form </h1> --> <ol class="breadcrumb"> <li> <i class="fa fa-dashboard"></i> <a href="index.html">Dashboard</a> </li> <li class="active"> <i class="fa fa-edit"></i> Form </li> </ol> </div> </div> <!-- /.row --> <div class="row"> <div class="col-lg-12"> <form role="form" id="formING" name="formING" onsubmit="submitForm()"> <div class="form-group"> <label>Klantnaam</label> <input id="customer" class="form-control"> </div> <div class="form-group"> <label>KVK nummer</label> <input id="kvk" class="form-control"> </div> <div class="form-group"> <label>Adres</label> <input id="address" class="form-control"> </div> <div class="form-group"> <label>Postcode</label> <input id="postcode" class="form-control"> </div> <div class="form-group"> <label>Gemeente</label> <input id="gemeente" class="form-control"> </div> <div class="form-group"> <label>Hoogte lening</label> <input id="loan" class="form-control"> </div> <div class="form-group"> <label>Type lening</label> <select id="type" class="form-control"> <option value="restaurant">Restaurant</option> <option value="kantoor">Kantoor</option> </select> </div> <button type="submit" class="btn btn-default">Submit Button</button> <button type="reset" class="btn btn-default">Reset Button</button> </form> </div> </div> <!-- /.row -->'
 
 mapPage = '<!-- <h1 class="page-header"> Map </h1> --> <ol class="breadcrumb"> <li> <i class="fa fa-dashboard"></i>  <a href="index.html">Dashboard</a> </li> <li class="active"> <i class="fa fa-edit"></i> Map </li> </ol> <!-- Page Heading --> <div class="row"> <div class="col-lg-12"> <nav id="menu"></nav> <div id="map"></div> </div> </div> <!-- /.row --><div class="row"><div class="col-lg-4"><div class="panel panel-green"><div class="panel-heading"><h3 class="panel-title" id="leeftijdTitle"><i class="fa fa-long-arrow-right"></i>Leeftijdsverdeling per buurt (%)</h3></div><div class="panel-body"><div class="flot-chart"><div class="flot-chart-content" id="flot-pie-chart"><center>Klik op een buurt</center></div></div></div></div></div><div class="col-lg-4"><div class="panel panel-yellow"><div class="panel-heading"><h3 class="panel-title" id="bagTitle"><i class="fa fa-long-arrow-right"></i> BAG pand informatie</h3></div><div class="panel-body"><div class="flot-chart"><div class="flot-chart-content" id="bagTable"><center>Klik op een BAG pand</center></div></div></div></div></div><div class="col-lg-4"><div class="panel panel-primary"><div class="panel-heading"><h3 class="panel-title" id="fmeTitle"><i class="fa fa-long-arrow-right"></i> FME Cloud data</h3></div><div class="panel-body"><div class="flot-chart"><div class="flot-chart-content" id="fmeContent">Data van Martins FME Cloud komt vrijdag</div></div></div></div></div></div>'
 
@@ -22,10 +22,17 @@ $("#mapPage").click(function(){
 });
 
 function submitForm() {
+  var loanType = document.forms["formING"]["type"].value;
+  console.log(loanType);
+  var loanAmount = document.forms["formING"]["loan"].value;
+  console.log(loanAmount);
+
+
   console.log(document.forms["formING"]["customer"].value);
   window.address = document.forms["formING"]["address"].value;
   window.zipcode = document.forms["formING"]["postcode"].value.replace(/\s/g, '');;
   window.municipality = document.forms["formING"]["gemeente"].value;
+
   var fullAddress = address + ',+' + zipcode + ',+' + municipality;
   console.log(fullAddress);
   $(".container-fluid").html(mapPage);
@@ -72,9 +79,9 @@ function geocodeAddress(Address){
       }
       loadMap(lng,lat);
       map.on('load', function () {
-        console.log(window.lat+" "+window.lng);
+        console.log(lat+" "+lng);
         loadData();
-        addMarker(window.lat,window.lng, window.address);
+        addMarker(lat,lng, address);
       });
     }
   });
