@@ -35,11 +35,19 @@ var Application = (function () {
         // this._map.addControl(mapboxgl.Map({
         //     "accessToken": mapboxgl.accessToken
         // }));
+        this._map.on('moveend', $.proxy(function () {
+            console.log("move-end");
+            this.refreshData();
+        }, this));
     };
     Application.prototype.submitForm = function () {
+        this._loanType = document.forms["formING"]["type"].value;
+        console.log(this._loanType);
+        this._loanAmount = document.forms["formING"]["loan"].value;
+        console.log(this._loanAmount);
         console.log(document.forms["formING"]["customer"].value);
         this._address = document.forms["formING"]["address"].value;
-        this._zipcode = document.forms["formING"]["postcode"].value;
+        this._zipcode = document.forms["formING"]["postcode"].value.replace(/\s/g, '');
         this._municipality = document.forms["formING"]["gemeente"].value;
         this._fullAddress = this._address + ',+' + this._zipcode + ',+' + this._municipality;
         console.log(this._fullAddress);
@@ -52,9 +60,17 @@ var Application = (function () {
         $.ajax({
             url: geocodeURL,
             success: $.proxy(function (result) {
-                console.log(result["0"]);
-                var lat = result["0"].lat;
-                var lng = result["0"].lon;
+                var lat = 52.314182;
+                var lng = 4.951721;
+                var Address = "ING Bank, Bijlmerplein 888, 1102 MG Amsterdam-Zuidoost";
+                if (!result["0"]) {
+                    alert("Geen locatie gevonden");
+                }
+                else {
+                    console.log(result["0"]);
+                    lat = result["0"].lat;
+                    lng = result["0"].lon;
+                }
                 this.loadMap(lng, lat);
                 this._map.on('load', $.proxy(function () {
                     this.loadData();
@@ -94,6 +110,37 @@ var Application = (function () {
         //     }
         // });
     };
+    // TW
+    Application.prototype.refreshData = function () {
+        var bounds = this._map.getBounds();
+        var ne = bounds._ne;
+        var sw = bounds._sw;
+        var bbox = 'bbox=' + sw.lat + "," + sw.lng + "," + ne.lat + "," + ne.lng;
+        var bboxReverse = 'bbox=' + sw.lng + "," + sw.lat + "," + ne.lng + "," + ne.lat;
+        var ratio = (ne.lat - sw.lat) / (ne.lng - sw.lng);
+        console.log("load data for " + bbox + " ratio: " + ratio);
+        var bag_url = this._config.bagUrl + '&' + bboxReverse + ',EPSG:4326';
+        console.log(bag_url);
+        this.refreshWFS(bag_url, "BAG", "#E89C0C", 0.8);
+        var buurt_url = this._config.buurtUrl + '&' + bboxReverse + ',EPSG:4326';
+        console.log(buurt_url);
+        this.refreshWFS(buurt_url, "CBS Buurten", "#088", 0.6);
+    };
+    //TW
+    Application.prototype.refreshWFS = function (wfs_url, name, color, opacity) {
+        $.ajax({ url: wfs_url, success: $.proxy(function (result) {
+                console.log(result);
+                //debugger;
+                var geojson = {
+                    'type': 'geojson',
+                    'data': result
+                };
+                console.log(geojson);
+                var o = this._map.getSource("source_" + name);
+                o.setData(result);
+                //window.map.addSource ( "source_"+name, geojson )
+            }, this) });
+    };
     Application.prototype.loadData = function () {
         var bounds = this._map.getBounds();
         var ne = bounds._ne;
@@ -108,6 +155,10 @@ var Application = (function () {
         var buurt_url = this._config.buurtUrl + '&' + bboxReverse + ',EPSG:4326';
         console.log(buurt_url);
         this.getWFS(buurt_url, "CBS Buurten", "#088", 0.6);
+        //TW
+        var fme_service_url = this._config.fmeUrl;
+        console.log(fme_service_url);
+        this.getWFS(fme_service_url, "FME", "#088", 0.6);
         var toggleableLayerIds = ['BAG', 'CBS Buurten'];
         var _loop_1 = function(i) {
             var id = toggleableLayerIds[i];
@@ -168,22 +219,38 @@ var Application = (function () {
         $.ajax({
             url: wfs_url, success: $.proxy(function (result) {
                 console.log(result);
+                if (name === "FME") {
+                    result = JSON.parse(result);
+                }
                 var geojson = {
                     'type': 'geojson',
                     'data': result
                 };
                 console.log(geojson);
                 this._map.addSource("source_" + name, geojson);
-                this._map.addLayer({
-                    "id": name,
-                    "type": "fill",
-                    "source": "source_" + name,
-                    'paint': {
-                        'fill-color': color,
-                        'fill-opacity': opacity,
-                        'fill-outline-color': '#000'
-                    }
-                });
+                if (name === "FME") {
+                    this._map.addLayer({
+                        "id": name,
+                        "type": "circle",
+                        "source": "source_" + name,
+                        "paint": {
+                            "circle-radius": 10,
+                            "circle-color": "#3887be"
+                        }
+                    });
+                }
+                else {
+                    this._map.addLayer({
+                        "id": name,
+                        "type": "fill",
+                        "source": "source_" + name,
+                        'paint': {
+                            'fill-color': color,
+                            'fill-opacity': opacity,
+                            'fill-outline-color': '#000'
+                        }
+                    });
+                }
                 this._map.moveLayer(name, this._address);
             }, this)
         });
